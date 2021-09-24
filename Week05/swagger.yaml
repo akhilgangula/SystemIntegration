@@ -5,9 +5,9 @@ info:
   version: 0.1.9
 servers:
   - url: http://localhost:3002
-    description: Optional server description, e.g. Main (production) server
-  - url: http://staging-api.example.com
-    description: Optional server description, e.g. Internal staging server for testing
+    description: Local server
+  - url: http://157.230.59.55:3002
+    description: dev hosted server
 paths:
   /students:
     get:
