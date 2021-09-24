@@ -108,7 +108,7 @@ paths:
         - in: path
           name: studentId
           required: true
-          example: 123
+          example: 1234
           type: integer
           minimum: 1
           description: The ID of the student to be added.

@@ -3,7 +3,7 @@ const swaggerUi = require('swagger-ui-express');
 const YAML = require( 'yamljs');
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const Joi = require("Joi");
+const Joi = require("joi");
 const dataStore = require('./dataStore');
 const swaggerDocs = YAML.load('./swagger.yaml');
 
