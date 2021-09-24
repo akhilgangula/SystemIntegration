@@ -21,7 +21,7 @@ app.get('/students', (req, res) => {
     if (transformedData.length === 0) {
         return res.status(404).send({ message: 'No data available' });
     }
-    return res.status(200).json({ data: transformData });
+    return res.status(200).json({ data: transformedData });
 });
 
 
@@ -64,6 +64,13 @@ app.post('/student',
 app.patch('/student/:id',
     validateSchema(paramSchema, 'params'),
     validateSchema(schema, 'body'),
+    body('email').isEmail().normalizeEmail(),
+    body('id').trim().escape(),
+    body('firstName').trim().escape(),
+    body('lastName').trim().escape(),
+    body('deptName').trim().escape(),
+    body('age').isNumeric(),
+    body('admitted').toBoolean(),
     (req, res) => {
         const { body, params: { id } } = req;
         try {
@@ -78,6 +85,13 @@ app.patch('/student/:id',
 app.put('/student/:id',
     validateSchema(paramSchema, 'params'),
     validateSchema(schema, 'body'),
+    body('email').isEmail().normalizeEmail(),
+    body('id').trim().escape(),
+    body('firstName').trim().escape(),
+    body('lastName').trim().escape(),
+    body('deptName').trim().escape(),
+    body('age').isNumeric(),
+    body('admitted').toBoolean(),
     (req, res) => {
         const { body, params: { id } } = req;
         if (dataStore.checkIfExists(id)) {
