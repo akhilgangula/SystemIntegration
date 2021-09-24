@@ -1,66 +1,21 @@
 const express = require('express');
-const app = express();
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('swagger-jsdoc');
-const dataStore = require('./dataStore');
-const bodyParser = require('body-parser');
-const PORT = 3002;
-const Joi = require("Joi");
-const { body, validationResult, param } = require('express-validator');
 const YAML = require( 'yamljs');
-app.use(bodyParser.json());
-const options = {
-    swaggerDefinition: {
-        info: {
-            title: 'College API',
-            description: "Student API Information",
-            version: '1.0.0',
-            servers: [`http://localhost:${PORT}`]
-        },
-        components: {
-            schemas: {
-                User:
-                {
-                    type: 'object',
-                    properties:
-                    {
-                        id: {
-                            type: 'integer',
-                            description: 'The user ID.'
-                        },
-                        username:
-                        {
-                            type: 'string',
-                            description: 'The user name.'
-                        }
-                    }
-                }
-            }
-        },
-    },
-    apis: ['index.js'], // files containing annotations as above
-};
-
-// const swaggerDocs = swaggerDocument(options);
-
+const bodyParser = require('body-parser');
+const { body } = require('express-validator');
+const Joi = require("Joi");
+const dataStore = require('./dataStore');
 const swaggerDocs = YAML.load('./swagger.yaml');
+
+const app = express();
+const PORT = 3002;
+
+const paramSchema = Joi.object({ id: Joi.number().required() });
+const transformData = (data) => Object.values(data).map(entry => entry);
+
+app.use(bodyParser.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-
-
-/**
- * @swagger
- * /students:
- *   get:
- *     description: get all students
- *     responses:
- *       200:
- *         description: Returns a list of student records
- *         content:
- *          application/json:
- *            schema:
- *              $ref: '#/components/schemas/User'
- */
 app.get('/students', (req, res) => {
     const transformedData = transformData(dataStore.getData());
     if (transformedData.length === 0) {
@@ -69,7 +24,6 @@ app.get('/students', (req, res) => {
     return res.status(200).json({ data: transformData });
 });
 
-const transformData = (data) => Object.values(data).map(entry => entry);
 
 const schema = Joi.object({
     id: Joi.number().required(),
@@ -89,15 +43,6 @@ const validateSchema = (schema, property) => (req, res, next) => {
     next();
 }
 
-/**
- * @swagger
- * /students:
- *   post:
- *     description: add a new student entry
- *     responses:
- *       200:
- *         description: Returns updated store.
- */
 app.post('/student',
     validateSchema(schema, 'body'),
     body('email').isEmail().normalizeEmail(),
@@ -115,16 +60,7 @@ app.post('/student',
         const data = dataStore.addEntry(body.id, body);
         return res.status(201).send({ data: transformData(data) });
     });
-const paramSchema = Joi.object({ id: Joi.number().required() });
-/**
- * @swagger
- * /students:
- *   patch:
- *     description: updates student entry
- *     responses:
- *       200:
- *         description: Returns updated store.
- */
+
 app.patch('/student/:id',
     validateSchema(paramSchema, 'params'),
     validateSchema(schema, 'body'),
@@ -138,15 +74,7 @@ app.patch('/student/:id',
         }
     });
 
-/**
- * @swagger
- * /students:
- *   put:
- *     description: updates if entry is present else creates record.
- *     responses:
- *       200:
- *         description: Returns updated store.
- */
+
 app.put('/student/:id',
     validateSchema(paramSchema, 'params'),
     validateSchema(schema, 'body'),
@@ -161,15 +89,6 @@ app.put('/student/:id',
         }
     });
 
-/**
- * @swagger
- * /students:
- *   delete:
- *     description: delete student record
- *     responses:
- *       200:
- *         description: Returns a mysterious string.
- */
 app.delete('/student/:id',
     validateSchema(paramSchema, 'params'),
     (req, res) => {
@@ -180,15 +99,6 @@ app.delete('/student/:id',
         return res.status(500).send({ message: `${id} not found` });
     });
 
-/**
- * @swagger
- * /health:
- *   get:
- *     description: health check
- *     responses:
- *       200:
- *         description: Returns a mysterious string.
- */
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
