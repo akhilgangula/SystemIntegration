@@ -50,7 +50,6 @@ app.get('/say', async (req, res) => {
         return res.status(400).send({error: "keyword is a required field"});
     }
     const { status, data } = await axios.get(`https://g0s862f4f3.execute-api.us-east-2.amazonaws.com/dev?keyword=${req.query.keyword}`);
-    console.log(status, data);
     res.status(status).send(data);
 });
 
