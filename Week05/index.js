@@ -1,11 +1,12 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
-const YAML = require( 'yamljs');
+const YAML = require('yamljs');
 const bodyParser = require('body-parser');
-const { body } = require('express-validator');
+const { body, query } = require('express-validator');
 const Joi = require("joi");
 const dataStore = require('./dataStore');
 const swaggerDocs = YAML.load('./swagger.yaml');
+const axios = require('axios');
 
 const app = express();
 const PORT = 3002;
@@ -15,6 +16,7 @@ const transformData = (data) => Object.values(data).map(entry => entry);
 
 app.use(bodyParser.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 
 app.get('/students', (req, res) => {
     const transformedData = transformData(dataStore.getData());
@@ -42,6 +44,15 @@ const validateSchema = (schema, property) => (req, res, next) => {
     }
     next();
 }
+
+app.get('/say', async (req, res) => {
+    if(!req.query.keyword) {
+        return res.status(400).send({error: "keyword is a required field"});
+    }
+    const { status, data } = await axios.get(`https://g0s862f4f3.execute-api.us-east-2.amazonaws.com/dev?keyword=${req.query.keyword}`);
+    console.log(status, data);
+    res.status(status).send(data);
+});
 
 app.post('/student',
     validateSchema(schema, 'body'),
